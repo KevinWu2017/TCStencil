@@ -2,11 +2,46 @@ from multiprocessing import Pool
 import itertools, subprocess, argparse
 from param import FLAG_DICT, COMMON_SOURCE, BASELINE_SOURCE, TENSOR_SOURCE, BINARY_DIR
 
+import os
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--arch', type=str, default='A100')
 args = parser.parse_args()
 
-BASE_FLAGS = '-O3 -arch sm_80 -DRUN_TIMES=1' if args.arch == 'A100' else '-O3 -arch sm_70 -DRUN_TIMES=1'
+BASE_FLAGS = ''
+gpu_name = ''
+try:
+    # 调用 nvidia-smi 获取 GPU 名称和计算能力
+    output = subprocess.check_output(
+        ["nvidia-smi", "--id=0", "--query-gpu=name,compute_cap", "--format=csv,noheader"],
+        universal_newlines=True
+    ).strip()
+    gpu_name, gpu_cc = [s.strip() for s in output.split(',')]
+    print(f"GPU Name: {gpu_name}")
+    print(f"GPU Compute Capability: {gpu_cc}")
+    # 根据计算能力设置 CUDA_COMPUTE_CAPABILITY
+    if gpu_cc == "8.0":
+        BASE_FLAGS = '-O3 -arch sm_80 -DRUN_TIMES=1'
+    elif gpu_cc == "8.6":
+        BASE_FLAGS = '-O3 -arch sm_70 -DRUN_TIMES=1'
+    elif gpu_cc == "8.9":
+        BASE_FLAGS = '-O3 -arch sm_89 -DRUN_TIMES=1'
+    elif gpu_cc == "9.0":
+        BASE_FLAGS = '-O3 -arch sm_86 -DRUN_TIMES=1'
+    else:
+        raise RuntimeError(f"Unsupported GPU compute capability: {gpu_cc}")
+except Exception as e:
+    raise RuntimeError(f"Failed to detect GPU compute capability: {e}")
+
+# 创建输出目录
+BINARY_DIR = f'./data/{gpu_name}/layout16/'
+if not os.path.exists(BINARY_DIR):
+    os.makedirs(BINARY_DIR)
+    print(f"Created directory: {BINARY_DIR}")
+else:
+    print(f"Directory already exists: {BINARY_DIR}")
+
+# BASE_FLAGS = '-O3 -arch sm_80 -DRUN_TIMES=1' if args.arch == 'A100' else '-O3 -arch sm_70 -DRUN_TIMES=1'
 
 
 def compile_command_gen(cuda_compute, stencil_size, mesh_size, tile_size):
