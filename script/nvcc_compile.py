@@ -4,9 +4,9 @@ from param import FLAG_DICT, COMMON_SOURCE, BASELINE_SOURCE, TENSOR_SOURCE, BINA
 
 import os
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--arch', type=str, default='A100')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('--arch', type=str, default='A100')
+# args = parser.parse_args()
 
 BASE_FLAGS = ''
 gpu_name = ''
@@ -17,6 +17,7 @@ try:
         universal_newlines=True
     ).strip()
     gpu_name, gpu_cc = [s.strip() for s in output.split(',')]
+    gpu_name = gpu_name.replace(' ', '_')
     print(f"GPU Name: {gpu_name}")
     print(f"GPU Compute Capability: {gpu_cc}")
     # 根据计算能力设置 CUDA_COMPUTE_CAPABILITY
@@ -34,12 +35,12 @@ except Exception as e:
     raise RuntimeError(f"Failed to detect GPU compute capability: {e}")
 
 # 创建输出目录
-BINARY_DIR = f'./data/{gpu_name}/layout16/'
-if not os.path.exists(BINARY_DIR):
-    os.makedirs(BINARY_DIR)
-    print(f"Created directory: {BINARY_DIR}")
+OUTPUT_DIR = f'./data/{gpu_name}/layout16/'
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+    print(f"Created directory: {OUTPUT_DIR}")
 else:
-    print(f"Directory already exists: {BINARY_DIR}")
+    print(f"Directory already exists: {OUTPUT_DIR}")
 
 # BASE_FLAGS = '-O3 -arch sm_80 -DRUN_TIMES=1' if args.arch == 'A100' else '-O3 -arch sm_70 -DRUN_TIMES=1'
 
@@ -81,7 +82,7 @@ def run_file_serial(file_list):
         print('{index}/{total} {file_name}'.format(index=index,
                                                    total=len(file_list), file_name=file_name))
         cmd = example_cmd.format(
-            file_name=file_name, output_file='./data/{}/layout16/ncu_result.txt'.format(args.arch),
+            file_name=file_name, output_file='./data/{}/layout16/ncu_result.txt'.format(gpu_name),
             BIN_DIR=BINARY_DIR)
         proc = subprocess.Popen(cmd.split(' '))
         proc.wait()
