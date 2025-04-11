@@ -4,3 +4,5 @@
 **/.DS_Store
 
 bin_ncu/*
+data/*
+figure/*
