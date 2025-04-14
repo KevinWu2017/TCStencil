@@ -68,7 +68,8 @@ def exec_cmd(cmd, wait=False):
         p.wait()
 
 def exec_cmd_list_async(cmd_list):
-    pool = Pool(24)
+    n_processors = os.cpu_count()
+    pool = Pool(n_processors)
     for cmd in cmd_list:
         pool.apply_async(exec_cmd, args=(cmd, True))
     pool.close()
