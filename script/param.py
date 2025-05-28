@@ -1,10 +1,19 @@
-FLAG_DICT = {
-    'stencil_size': ['box2d2r', 'star2d2r', 'box2d1r', 'star2d1r'],
-    # 'cuda_compute': ['baseline', 'tensor'],
-    'cuda_compute': ['tensor'],
-    'mesh_size': [(16 * 10 * i) for i in {32, 64}],
-    'tile_size': list(range(1, 16))
-}
+import os
+if int(os.getenv('PROFILE_TREND')) == 1:
+    FLAG_DICT = {
+        'stencil_size': ['box2d2r', 'box2d1r'],
+        'cuda_compute': ['tensor'],
+        'mesh_size': [160, 320] + [(16 * 10 * i * 4) for i in range(1, 17)],
+        'tile_size': list(range(1, 16))
+    }
+else:
+    FLAG_DICT = {
+        'stencil_size': ['box2d2r', 'star2d2r', 'box2d1r', 'star2d1r'],
+        # 'cuda_compute': ['baseline', 'tensor'],
+        'cuda_compute': ['tensor'],
+        'mesh_size': [(16 * 10 * i) for i in {64}],
+        'tile_size': list(range(1, 16))
+    }
 
 
 TENSOR_DIR = './layout16/'
