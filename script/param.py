@@ -1,5 +1,13 @@
 import os
-if int(os.getenv('PROFILE_TREND')) == 1:
+
+# Handle case when PROFILE_TREND environment variable is not set
+profile_trend = os.getenv('PROFILE_TREND', '0')
+try:
+    profile_trend = int(profile_trend)
+except ValueError:
+    profile_trend = 0
+
+if profile_trend == 1:
     FLAG_DICT = {
         'stencil_size': ['box2d2r', 'box2d1r'],
         'cuda_compute': ['tensor'],
