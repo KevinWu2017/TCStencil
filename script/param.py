@@ -14,6 +14,13 @@ if profile_trend == 1:
         'mesh_size': [160, 320] + [(16 * 10 * i * 4) for i in range(1, 17)],
         'tile_size': list(range(1, 16))
     }
+elif profile_trend == 2:
+    FLAG_DICT = {
+        'stencil_size': ['box2d2r'],
+        'cuda_compute': ['tensor'],
+        'mesh_size': [2 ** i * 640 for i in range(0, 5)],
+        'tile_size': list(range(1, 16))
+    }
 else:
     FLAG_DICT = {
         'stencil_size': ['box2d2r', 'star2d2r', 'box2d1r', 'star2d1r'],
